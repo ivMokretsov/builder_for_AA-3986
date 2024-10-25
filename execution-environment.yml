@@ -1,0 +1,65 @@
+---
+version: 3
+
+images:
+  base_image:
+    name: registry.astralinux.ru/library/astra/ubi17:latest
+
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: '--pre'
+
+dependencies:
+  python: requirements.txt
+  system: bindep.txt
+  ansible_runner:
+    package_pip: ansible-runner==2.3.5
+  ansible_core:
+    package_pip: ansible_core==2.15.9
+  python_interpreter:
+    python_path: /usr/bin/python3.9
+
+additional_build_files:
+  - src: astra-automation.list
+    dest: .
+
+additional_build_steps:
+  prepend_base:
+    - RUN echo "Executing prepend_base step"
+    - COPY _build/astra-automation.list /etc/apt/sources.list.d/
+    - RUN apt -y update
+    - RUN apt -y install python3.9 python3.9-pip python3.9-bindep
+
+  append_base:
+    - RUN echo "Executing append_base step"
+
+  prepend_galaxy:
+    - RUN echo "Executing prepend_galaxy step"
+
+  append_galaxy:
+    - RUN echo "Executing append_galaxy step"
+
+  prepend_builder:
+    - RUN echo "Executing prepend_builder step"
+
+  append_builder:
+    - RUN echo "Executing append_builder step"
+
+  prepend_final:
+    - RUN echo "Executing prepend_final step"
+
+  append_final:
+    - RUN echo "Executing append_final step"
+    - RUN ln -fsT /usr/bin/python3.9 /usr/bin/python3
+    - RUN ln -sTf /usr/bin/bash /usr/bin/sh
+    - ARG VERSION="devel"
+    - LABEL org.opencontainers.image.version="${VERSION}"
+    - LABEL org.opencontainers.image.vendor="Astra Automation'"
+    - LABEL org.opencontainers.image.title="Astra Automation Execution Environment"
+
+options:
+  user: root
+  workdir: /root
+  container_init:
+    cmd: '["bash"]'
+  tags:
+    - ansible-ee:latest

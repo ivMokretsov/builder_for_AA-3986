@@ -1,0 +1,4 @@
+ansible-lint
+openssh-client
+sudo
+python3-apt
